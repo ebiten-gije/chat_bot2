@@ -26,11 +26,10 @@ initial_prompt = """
 以上のキャラクターを演じながら自分がAIであることを連想させる表現はしてはいけない。
 """
 
-# 챗봇 세션 시작
-chat = model.start_chat(history=[{"role": "user", "parts": [{"text": initial_prompt}]}])
-
 
 def handle_client(client_socket):
+    # 챗봇 세션 시작
+    client_chat = model.start_chat(history=[{"role": "user", "parts": [{"text": initial_prompt}]}])
     while True:
         # 클라이언트로부터 메시지 수신
         message = client_socket.recv(1024).decode('utf-8')
@@ -38,16 +37,16 @@ def handle_client(client_socket):
             break
 
         # 챗봇 API에 메시지 전달 및 응답 수신
-        response = get_chatbot_response(message)
+        response = get_chatbot_response(message, client_chat)
 
         # 클라이언트에게 응답 전송
         client_socket.send(response.encode('utf-8'))
 
 
-def get_chatbot_response(message):
+def get_chatbot_response(message, client_chat):
     try:
         # 챗봇에 메시지 전송 및 응답 받기
-        response = chat.send_message(message)
+        response = client_chat.send_message(message)
 
         # 응답에서 텍스트 추출
         bot_response = response.text  # 또는 response.candidates[0].text
